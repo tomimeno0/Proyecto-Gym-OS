@@ -1,0 +1,21 @@
+name: proyecto-gym-os
+services:
+  mysql:
+    image: mysql:8.4
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Ejecutar npm run setup}
+      MYSQL_DATABASE: ${DB_NAME:-gym_os_registro}
+      MYSQL_USER: ${DB_USER:-gymos_registro}
+      MYSQL_PASSWORD: ${DB_PASSWORD:?Ejecutar npm run setup}
+    ports:
+      - '127.0.0.1:${DB_PORT:-3308}:3306'
+    volumes:
+      - registro-mysql:/var/lib/mysql
+    healthcheck:
+      test: ['CMD', 'mysqladmin', 'ping', '-h', '127.0.0.1', '--silent']
+      interval: 5s
+      timeout: 5s
+      retries: 30
+volumes:
+  registro-mysql:
