@@ -20,6 +20,8 @@ Se consideran nueve integrantes. Se conserva «Gade Silva y Lápiz» como un sol
 
 ## Lo mínimo que todos deben comprender
 
+Antes de preparar la exposición, cada integrante debe abrir su [guía individual](guias/README.md). Allí están las referencias a líneas del código, las funciones explicadas, ejemplos y respuestas a las preguntas de su bloque.
+
 El proyecto es una API en JavaScript. Express recibe solicitudes HTTP; las rutas eligen el controlador; los controladores validan los datos y trabajan con los modelos de Sequelize; MySQL conserva los registros. Registro crea la cuenta; login verifica la contraseña y abre una sesión; la cookie permite consultar `/users/me`; logout invalida la sesión.
 
 Cada uno estudia su bloque y conoce las entradas y salidas del bloque anterior y siguiente. Todos deben poder ejecutar el proyecto y explicar el recorrido general.

@@ -110,3 +110,5 @@ Las contraseñas se protegen con scrypt y una sal aleatoria por usuario. Las ses
 ## Equipo y defensa
 
 El reparto de responsabilidades, archivos y preguntas está en [REPARTO.md](REPARTO.md). Cada integrante debe revisar, ejecutar y comprender su bloque, y registrar sus modificaciones reales.
+
+Las [guías individuales de estudio](guias/README.md) explican el interior de los archivos: librerías, ubicación de los bloques, entradas y salidas de cada función, operaciones sobre la base, errores y prácticas para la defensa. Hay una guía para cada uno de los nueve integrantes.
