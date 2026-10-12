@@ -2,7 +2,7 @@
   "name": "proyecto-gym-os",
   "version": "0.1.0",
   "private": true,
-  "description": "Entrega parcial de GYM-OS: registro, login y base de datos de autenticaci\u00f3n.",
+  "description": "Entrega parcial de GYM-OS: inicio, registro, login y base de datos de autenticación.",
   "main": "index.js",
   "type": "commonjs",
   "engines": {
@@ -10,9 +10,11 @@
   },
   "scripts": {
     "start": "node index.js",
-    "dev": "node --watch index.js",
+    "dev": "npm run build && node --watch index.js",
     "setup": "node config/setup.js",
-    "db:init": "node config/init-db.js"
+    "db:init": "node config/init-db.js",
+    "prestart": "npm run build",
+    "build": "npm run build -w client"
   },
   "overrides": {
     "sequelize": {
@@ -28,5 +30,8 @@
     "mysql2": "3.24.2",
     "sequelize": "6.37.8",
     "zod": "4.5.4"
-  }
+  },
+  "workspaces": [
+    "client"
+  ]
 }

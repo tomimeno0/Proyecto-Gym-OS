@@ -97,3 +97,25 @@ Seguir login, `/users/me`, logout y una nueva consulta `/users/me` usando el arc
 ## Preparación para la exposición
 
 Podés explicar: «Mi bloque crea sesiones persistentes, las verifica en cada ruta privada y elimina la sesión al salir». Estás listo cuando podés distinguir token, hash, cookie y fila de sesión, y señalar las cuatro funciones.
+
+## Lo que se suma con la pantalla de inicio
+
+Sumá [AuthProvider y refresh, líneas 36–66](../client/src/lib.jsx#L36-L66), [api y aviso de vencimiento](../client/src/lib.jsx#L25-L31) y [Account.jsx, líneas 6–67](../client/src/pages/Account.jsx#L6-L67). Tu backend de sesiones no cambió.
+
+### `AuthProvider({children})`, `useAuth()` y `refresh()`
+
+El proveedor guarda `user`, `loading` y `error`, y los comparte con sus descendientes mediante contexto React. `useAuth()` lee ese contexto; no consulta por sí solo MySQL.
+
+`refresh()` no recibe argumentos. Marca carga, limpia el error y consulta `/users/me` mediante `api`. Si responde 200, guarda `data.usuario`. Si responde 401, deja `user` en null sin mostrar un fallo de infraestructura. Otros errores se muestran con opción de reintentar. El `finally` termina la carga. Se usa `useCallback` para conservar la referencia de esta función entre renders.
+
+El efecto inicial llama `refresh` y registra `session-expired`. Su callback `expire` limpia el usuario visual cuando una consulta protegida devuelve 401. La limpieza del efecto elimina ese listener. En desarrollo React StrictMode puede ejecutar el efecto inicial más de una vez; esa consulta GET no crea sesiones.
+
+### `Account()` y el callback de logout
+
+Mientras se verifica la sesión, muestra carga; con error ofrece reintentar; sin usuario usa `Navigate` hacia login. Con usuario muestra campos públicos. Esto organiza la pantalla: la protección SQL/HTTP sigue en `requireSession`.
+
+El botón usa `action.run` para impedir envíos repetidos. Su callback llama `api('/auth/logout', {})`, que hace POST. Si responde correctamente, limpia el usuario compartido y se vuelve al login. Si la sesión ya no existe y devuelve 401, también limpia el estado. Si hay un error de red o servidor, lo muestra y no afirma que haya cerrado la sesión. No se borra una cookie HttpOnly con JavaScript.
+
+**Práctica:** entrar, recargar la dirección de cuenta y mostrar que sigue conectado; salir y consultar `/users/me`, que debe devolver 401. Abrir `/cuenta` sin sesión debe mostrar login. Explicar por separado persistencia en MySQL, cookie del navegador y estado React.
+
+**Pregunta:** ¿React conoce inmediatamente el vencimiento aunque no se haga ninguna solicitud? **Respuesta:** no hay temporizador ni polling. El servidor lo comprueba en cada petición privada; la interfaz se actualiza al recargar o recibir un 401. No afirmar comprobación continua.

@@ -96,3 +96,23 @@ En un gestor SQL sobre esta base de demostración, ejecutar `SHOW TABLES;` y `SE
 ## Preparación para la exposición
 
 Podés explicar: «Mi bloque prepara el entorno, comparte una conexión Sequelize y crea las tablas y el rol inicial mediante un comando separado». Estás listo cuando podés señalar dónde se eligen el puerto, el dialecto, la contraseña y la persistencia del volumen.
+
+## Lo que se suma con la pantalla de inicio
+
+Tu bloque de base no cambió: siguen siendo cuatro tablas. Ahora también debés explicar cómo se instala el frontend sin mezclarlo con MySQL. Abrí [package.json](../package.json), [client/package.json](../client/package.json), [.gitignore](../.gitignore) y [config/frontend.js](../config/frontend.js).
+
+### Tres operaciones que no se deben confundir
+
+`npm ci`, ejecutado desde la raíz del repositorio, instala las dependencias exactas del lockfile e incluye el workspace `client`. React y React DOM ejecutan la interfaz; Vite y su plugin son herramientas de compilación. Express, Sequelize y mysql2 siguen ejecutándose en Node.
+
+`npm run build` transforma JSX/CSS en archivos dentro de `client/dist`. No necesita conexión a MySQL, no ejecuta `sync`, no crea usuarios y no copia `.env` al navegador. `npm run db:init` hace lo contrario: prepara tablas y el rol Cliente, pero no construye ninguna pantalla. `npm start` compila mediante `prestart` y después arranca el servidor, que sí verifica la conexión con MySQL.
+
+### Credenciales y archivos generados
+
+`.env` continúa privado y `.gitignore` ahora también excluye `client/dist`. El código fuente de la interfaz y el lockfile se publican; el resultado compilado se vuelve a generar. El frontend llama direcciones relativas del mismo servidor, así que no recibe `DB_PASSWORD`, usuario SQL ni acceso directo a MySQL. No crear variables `VITE_*` con secretos: las variables de frontend pueden quedar incorporadas al JavaScript público.
+
+**Práctica:** señalar qué paso instala dependencias, cuál genera archivos de navegador y cuál crea tablas. Mostrar los puertos: 3001 para pantalla/API, 3308 para MySQL local. No cambiar los puertos del proyecto completo.
+
+**Pregunta:** ¿Borrar `client/dist` borra las cuentas? **Respuesta:** no; las cuentas están en MySQL y su volumen. La carpeta se reconstruye con `npm run build`. No hace falta eliminarla para la demostración.
+
+**Qué tenés que poder explicar:** `initialize` y la conexión de tu guía original, más la separación navegador -> API -> base y la instalación del workspace.

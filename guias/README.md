@@ -1,4 +1,4 @@
-# Guías individuales para entender y defender el backend
+# Guías individuales para entender y defender el proyecto
 
 Estas guías explican el código de esta entrega parcial. Cada integrante tiene un documento con ubicación de los bloques, librerías, funciones, conexiones con los demás y preguntas con respuestas. El reparto asigna responsabilidades de estudio y revisión; los aportes realizados se registran en [REPARTO.md](../REPARTO.md).
 
@@ -30,7 +30,8 @@ Los números de línea corresponden al código con el que se escribieron estas g
 ## Lo que todos necesitan ubicar
 
 ```text
-Cliente HTTP (Postman o curl)
+React en el navegador (o Postman/curl)
+    -> client/src/lib.jsx: api(path, body)
     -> index.js (recibe JSON y monta rutas)
     -> routes/ (selecciona el controlador)
     -> controllers/ (valida y ejecuta la operación)
@@ -63,6 +64,37 @@ Node.js ejecuta JavaScript en el servidor. Express atiende HTTP. Sequelize es el
 
 ## Qué forma parte de esta entrega
 
-Hay cuatro tablas y cinco endpoints. Se registra el rol Cliente, pero todavía no hay endpoints de administración de roles. El estado bloqueado se comprueba al entrar, pero no hay una pantalla ni un endpoint para bloquear cuentas. Se comprueba que el correo tenga formato válido; no se envía un correo de verificación. El backend no contiene interfaz gráfica ni integra IA.
+Hay cuatro tablas y cinco endpoints. Se registra el rol Cliente, pero todavía no hay endpoints de administración de roles. El estado bloqueado se comprueba al entrar, pero no hay una pantalla ni un endpoint para bloquear cuentas. Se comprueba que el correo tenga formato válido; no se envía un correo de verificación. Ahora se incluye la portada original y las pantallas React de registro, login y cuenta. No se incluyen entrenamiento, nutrición, progreso, administración ni IA. Las tarjetas de la portada presentan el alcance del proyecto completo; no son módulos funcionales de esta entrega.
 
 La demostración completa está en [la guía de Simón](09-simon-castellani.md) y la instalación está en [README](../README.md).
+
+## Actualización: pantalla de inicio y frontend
+
+Conservamos los nueve bloques del backend y añadimos a cada guía el tramo de frontend que se conecta con su responsabilidad. No tienen que estudiar todos todos los archivos: sí este recorrido común y su bloque adicional.
+
+```text
+client/index.html -> main.jsx -> App.jsx
+    -> BrowserRouter elige Landing, Auth o Account
+    -> AuthProvider comparte usuario y estado de sesión
+    -> api() envía JSON y deja que el navegador maneje la cookie
+    -> Express -> rutas -> controladores -> Sequelize -> MySQL
+    -> respuesta -> estado React -> pantalla actualizada
+```
+
+**Librerías nuevas:** React define componentes y estado (`useState`), efectos (`useEffect`) y contexto (`createContext`/`useContext`). `react-dom/client` monta la aplicación mediante `createRoot`. React Router maneja las direcciones, enlaces y redirecciones. `lucide-react` aporta íconos SVG. Vite y su plugin React compilan JSX y CSS; no reemplazan Express ni MySQL.
+
+| Integrante | Qué suma a su estudio                                                               |
+| ---------- | ----------------------------------------------------------------------------------- |
+| Gianluca   | `config/frontend.js`, scripts de compilación, puerto único y cabeceras              |
+| Tomás      | Instalación con workspaces, diferencia entre compilar React e inicializar MySQL     |
+| Iván       | Los campos públicos mostrados por `Account`, sin hashes ni edición del modelo       |
+| Paulo      | Cómo llega el rol Cliente desde las asociaciones hasta `user.roles`                 |
+| Gade       | Rama de registro de `Auth.submit`, confirmación y mensaje de cuenta creada          |
+| Valentín   | `api`, cookie HttpOnly y por qué no se almacenan credenciales en React/localStorage |
+| Mateo      | Rama de login de `Auth.submit`, errores y `setUser(data.usuario)`                   |
+| Joaquín    | `AuthProvider`, `refresh`, estado de carga, vencimiento y logout en `Account`       |
+| Simón      | `main`, `App`, `Brand`, `Landing`, componentes compartidos y estilos adaptables     |
+
+Todos deben distinguir una ruta de pantalla (`GET /login`, HTML) de una operación de API (`POST /auth/login`, JSON). La protección real de los datos está en el servidor: ocultar una pantalla con React no sustituye `requireSession`.
+
+**Ensayo conjunto:** abrir inicio -> crear cuenta ficticia -> comprobar que todavía no hay sesión -> ir al login -> ingresar -> revisar la cuenta -> recargar -> cerrar sesión -> intentar volver a `/cuenta`. Además mostrar contraseña incorrecta, correo duplicado y confirmación distinta. No hace falta ni corresponde afirmar aportes que no realizaron: registrar las revisiones efectivas en REPARTO.

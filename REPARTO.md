@@ -1,6 +1,6 @@
 # Reparto de responsabilidades y preparación de la defensa
 
-Este documento asigna bloques para implementar, revisar y explicar. La asignación no acredita por sí sola autoría del código. Cada integrante debe dejar registradas las revisiones y modificaciones que realmente haya realizado. El backend inicial de esta entrega fue preparado con asistencia de Codex.
+Este documento asigna bloques para implementar, revisar y explicar. La asignación no acredita por sí sola autoría del código. Cada integrante debe dejar registradas las revisiones y modificaciones que realmente haya realizado. El backend inicial y la adaptación de la interfaz de esta entrega fueron preparados con asistencia de Codex.
 
 Se consideran nueve integrantes. Se conserva «Gade Silva y Lápiz» como un solo nombre, según el listado recibido.
 
@@ -22,7 +22,7 @@ Se consideran nueve integrantes. Se conserva «Gade Silva y Lápiz» como un sol
 
 Antes de preparar la exposición, cada integrante debe abrir su [guía individual](guias/README.md). Allí están las referencias a líneas del código, las funciones explicadas, ejemplos y respuestas a las preguntas de su bloque.
 
-El proyecto es una API en JavaScript. Express recibe solicitudes HTTP; las rutas eligen el controlador; los controladores validan los datos y trabajan con los modelos de Sequelize; MySQL conserva los registros. Registro crea la cuenta; login verifica la contraseña y abre una sesión; la cookie permite consultar `/users/me`; logout invalida la sesión.
+El proyecto combina una interfaz React y una API en JavaScript. Express recibe solicitudes HTTP; las rutas eligen el controlador; los controladores validan los datos y trabajan con los modelos de Sequelize; MySQL conserva los registros. Registro crea la cuenta; login verifica la contraseña y abre una sesión; la cookie permite consultar `/users/me`; logout invalida la sesión.
 
 Cada uno estudia su bloque y conoce las entradas y salidas del bloque anterior y siguiente. Todos deben poder ejecutar el proyecto y explicar el recorrido general.
 
@@ -109,3 +109,21 @@ Completar después de trabajar efectivamente sobre el bloque. Los commits deben 
 | Mateo Romani       | Pendiente          | —                               | —                       |
 | Joaquín Casanou    | Pendiente          | —                               | —                       |
 | Simón Castellani   | Pendiente          | —                               | —                       |
+
+## Reparto actualizado con la pantalla de inicio
+
+Las responsabilidades anteriores se mantienen. Estos archivos se suman al estudio y revisión; la explicación detallada está al final de cada guía individual.
+
+| Integrante         | Archivos adicionales o conexión a estudiar                                               | Demostración                                                                                          |
+| ------------------ | ---------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| Gianluca Pizarro   | `config/frontend.js`, `client/vite.config.js`, scripts en `package.json`                 | Compilar y servir React y API en el puerto 3001; abrir directamente `/login`                          |
+| Tomás Minossi      | Workspaces en `package.json`, `client/package.json`, `.gitignore`                        | Distinguir instalación, compilación y creación de tablas; explicar que el frontend no contiene `.env` |
+| Iván Lerner        | `client/src/pages/Account.jsx`, `publicUser`                                             | Relacionar campos de la cuenta con Usuario y explicar qué datos no se exponen                         |
+| Paulo López        | `Account.jsx`, consultas de roles del login y la sesión                                  | Seguir el rol Cliente desde MySQL hasta la pantalla; no hay selector de rol                           |
+| Gade Silva y Lápiz | `client/src/pages/Auth.jsx`: `field`, rama de registro de `submit`                       | Registrar y mostrar éxito, confirmación distinta y correo duplicado                                   |
+| Valentín Schueld   | `client/src/lib.jsx`: `api`; formularios y cookie                                        | Explicar envío de credenciales, HttpOnly y ausencia de tokens en localStorage                         |
+| Mateo Romani       | `Auth.jsx`: rama de login de `submit`, `Navigate`                                        | Contraseña incorrecta, login correcto y actualización del usuario compartido                          |
+| Joaquín Casanou    | `lib.jsx`: `AuthProvider`, `refresh`; `Account.jsx`: logout                              | Recargar conservando sesión, salir y comprobar rechazo del acceso privado                             |
+| Simón Castellani   | `client/src/main.jsx`, `App.jsx`, `pages/Landing.jsx`, `components/ui.jsx`, `styles.css` | Explicar componentes, rutas, botones y adaptación móvil de la portada original                        |
+
+En la exposición, Simón presenta la portada al principio; después se sigue el orden del backend y se vuelve a los formularios para la demostración. Gianluca y Tomás explican cómo se ejecuta el conjunto. Cada responsable de registro, login o sesión recorre tanto su controlador como el tramo React que lo llama.

@@ -114,3 +114,25 @@ Registrá una cuenta ficticia siguiendo el README. Mostrá `201`, la fila de usu
 ## Preparación para la exposición
 
 Podés explicar: «Mi bloque recibe los datos validados, protege la contraseña y guarda usuario y rol juntos. Después responde con datos públicos». Estás listo cuando podés señalar esos cinco pasos en la función sin leerla palabra por palabra.
+
+## Lo que se suma con la pantalla de inicio
+
+Además del controlador de registro, estudiá [Auth.jsx, líneas 8–63](../client/src/pages/Auth.jsx#L8-L63), [el formulario, líneas 98–163](../client/src/pages/Auth.jsx#L98-L163) y [useAction, líneas 68–91](../client/src/lib.jsx#L68-L91). Tu parte es la rama `mode === 'registro'`; Mateo prepara la rama de login.
+
+### Estado y `field(key)`
+
+`Auth({mode})` usa React `useState` para conservar los valores y si ya se creó la cuenta. `field(key)` devuelve `name`, `value` y un callback `onChange` para un input. Ese callback reemplaza sólo el campo editado conservando los demás. El campo de confirmación existe en el navegador, pero no es una columna SQL.
+
+`Field` es un componente compartido: enlaza una etiqueta con su input mediante `useId`. Las propiedades `required`, `minLength`, `maxLength` y `type=email` ayudan en el navegador; no sustituyen `registerSchema` en el servidor.
+
+### `submit(e)` en registro
+
+Recibe el evento de envío y llama `preventDefault` para evitar que el navegador recargue como formulario HTML tradicional. Ejecuta el trabajo dentro de `action.run`. Primero compara password y confirmación. Si difieren, lanza un error visible y no llama a la API.
+
+Si coinciden, `api('/auth/register', body)` envía únicamente nombre, apellido, email y password. No manda `confirm`, `rol` ni `estado`; así respeta el esquema estricto de Zod. El backend calcula el hash y realiza la transacción de tu guía original. Si responde 201, se limpian las contraseñas del estado, `registered` cambia a true y se muestra el mensaje con enlace al login. No se llama `setUser`: crear una cuenta no abre una sesión.
+
+`useAction.run` mantiene un bloqueo con `useRef`, deshabilita el formulario mientras espera y muestra fallos con `Feedback`. Un correo repetido produce el 409 del backend, que aparece en pantalla. El bloqueo de botón evita dobles clics accidentales, pero la unicidad definitiva sigue siendo de MySQL.
+
+**Práctica:** confirmación distinta -> ningún registro; registro válido -> éxito sin sesión; correo repetido -> error. Después señalar qué parte valida en el navegador y cuál protege en el servidor.
+
+**Pregunta:** ¿Por qué no reutilizamos sin cambios el registro del proyecto completo? **Respuesta:** su respuesta y sesión no son iguales a las de esta API parcial; aquí se devuelve `usuario` y el registro requiere login posterior.

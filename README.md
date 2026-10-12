@@ -1,6 +1,6 @@
 # Proyecto Gym OS
 
-Entrega parcial del backend: registro de usuarios, inicio de sesión y base de datos de autenticación. JavaScript, Express, Sequelize y MySQL. Sin frontend.
+Entrega parcial con la pantalla de inicio reutilizada del proyecto completo, registro, inicio de sesión, consulta de la cuenta y cierre de sesión. JavaScript, React, Express, Sequelize y MySQL. No incluye los módulos de entrenamiento, nutrición, progreso ni IA.
 
 ## Instalación
 
@@ -16,9 +16,9 @@ npm run dev
 
 Si Docker Compose está instalado como comando independiente, reemplazar `docker compose` por `docker-compose`. Con una instalación propia de MySQL, crear una base vacía llamada `gym_os_registro`, otorgar acceso a un usuario exclusivo y completar `DB_*` en `.env`. No hace falta Docker en ese caso.
 
-La API escucha en `http://localhost:3001` y Docker publica MySQL en `127.0.0.1:3308`. `npm run setup` genera las contraseñas privadas sin reemplazar una configuración existente. No publicar `.env`.
+La pantalla de inicio y la API se abren en `http://localhost:3001` y Docker publica MySQL en `127.0.0.1:3308`. `npm run setup` genera las contraseñas privadas sin reemplazar una configuración existente. No publicar `.env`.
 
-`npm run db:init` crea las tablas faltantes y el rol Cliente. No borra datos ni modifica automáticamente tablas existentes. Para posteriores cambios de esquema hacen falta migraciones explícitas. `npm start` ejecuta la API sin recarga automática.
+`npm run db:init` crea las tablas faltantes y el rol Cliente. No borra datos ni modifica automáticamente tablas existentes. Para posteriores cambios de esquema hacen falta migraciones explícitas. `npm start` compila React automáticamente mediante `prestart` y ejecuta Express sin recarga automática. `npm run dev` también compila al arrancar y luego observa los cambios del servidor. Si editás el frontend, ejecutá `npm run build` y recargá el navegador; no hay un segundo servidor de desarrollo ni hace falta CORS. Ejecutar los comandos desde la raíz de este repositorio.
 
 ## Estructura
 
@@ -26,7 +26,21 @@ Se sigue la organización de REPASO COMPLETO: CommonJS (`require` / `module.expo
 
 ```text
 index.js
+client/
+  index.html
+  package.json
+  vite.config.js
+  src/
+    main.jsx
+    App.jsx
+    lib.jsx
+    styles.css
+    components/ui.jsx
+    pages/Landing.jsx
+    pages/Auth.jsx
+    pages/Account.jsx
 config/
+  frontend.js
   db.js
   env.js
   init-db.js
@@ -49,6 +63,22 @@ routes/
   auth.routes.js
   users.routes.js
 ```
+
+## Pantallas y funcionamiento
+
+| Dirección   | Qué permite hacer                                                           |
+| ----------- | --------------------------------------------------------------------------- |
+| `/`         | Portada original de GYM-OS, con enlaces al registro y login                 |
+| `/nosotros` | Presentación del proyecto con el mismo diseño                               |
+| `/registro` | Crear una cuenta y ver errores de validación                                |
+| `/login`    | Iniciar sesión con una cuenta existente                                     |
+| `/cuenta`   | Consultar los datos públicos y cerrar sesión; sin sesión, redirige al login |
+
+La portada conserva el diseño, textos, ilustración tipográfica e identidad verde y crema del proyecto completo. Las tarjetas de entrenamiento, nutrición y progreso son presentación del proyecto: esos módulos no están implementados en este repositorio. No se copiaron sus modelos, controladores ni pantallas.
+
+El registro no inicia sesión automáticamente. Después de crear la cuenta se muestra un enlace al login. Las credenciales viajan al servidor local; React no calcula los hashes ni lee la cookie HttpOnly. Al recargar, consulta `/users/me` para recuperar la sesión. No se guardan contraseñas ni tokens en localStorage.
+
+El backend conserva la estructura CommonJS de REPASO COMPLETO. React usa módulos ES en `client/`, compilados por Vite; `config/frontend.js` sirve `client/dist` desde el mismo Express y el mismo puerto. `client/dist` es generado y se excluye de Git: se reconstruye con los scripts npm.
 
 ## API
 

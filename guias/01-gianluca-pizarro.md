@@ -8,11 +8,11 @@ Poder abrir `index.js` y explicar cómo queda lista la API, por qué importa el 
 
 | Archivo y ubicación                                   | Qué encontrás                                        |
 | ----------------------------------------------------- | ---------------------------------------------------- |
-| [index.js, líneas 1–9](../index.js#L1-L9)             | Importaciones y carga de modelos/rutas               |
-| [index.js, líneas 11–25](../index.js#L11-L25)         | Creación del servidor y middleware común             |
-| [index.js, líneas 26–32](../index.js#L26-L32)         | Salud, montaje de rutas y respuesta 404              |
-| [index.js, líneas 33–52](../index.js#L33-L52)         | Manejador central de errores                         |
-| [index.js, líneas 54–72](../index.js#L54-L72)         | Función `start`, cierre del servidor y fallo inicial |
+| [index.js, líneas 1–10](../index.js#L1-L10)           | Importaciones y carga de modelos/rutas               |
+| [index.js, líneas 12–30](../index.js#L12-L30)         | Creación del servidor y middleware común             |
+| [index.js, líneas 31–38](../index.js#L31-L38)         | Salud, montaje de rutas y respuesta 404              |
+| [index.js, líneas 39–58](../index.js#L39-L58)         | Manejador central de errores                         |
+| [index.js, líneas 60–78](../index.js#L60-L78)         | Función `start`, cierre del servidor y fallo inicial |
 | [config/env.js, líneas 1–30](../config/env.js#L1-L30) | Lectura y validación de configuración                |
 | [package.json](../package.json)                       | Dependencias, CommonJS y comandos npm                |
 
@@ -51,7 +51,7 @@ Recibe una solicitud sin pedir sesión, ejecuta `sequelize.authenticate()` y dev
 
 `server.use('/auth', authRoutes)` agrega el prefijo `/auth` a las rutas del archivo. Por eso `/login` termina siendo `/auth/login`. Lo mismo ocurre con `/users` y `/me`.
 
-El callback que devuelve `404` está después de esas rutas. Sólo se alcanza si ninguna ruta anterior respondió.
+Después de las rutas API se ejecuta `setupFrontend(server)`. El callback que devuelve `404` está después de las rutas de pantalla y API. Sólo se alcanza si ninguna ruta anterior respondió.
 
 ### Callback central de errores
 
@@ -86,7 +86,7 @@ Simón registra las rutas, Gade/Mateo atienden registro/login y Joaquín comprue
 
 ## Práctica que tenés que poder hacer
 
-Con MySQL preparado, ejecutar `npm start` y consultar `GET http://localhost:3001/health`. Después solicitar `/inexistente` para mostrar el `404` y enviar JSON mal escrito a `/auth/login` para mostrar el `400`. En `package.json`, señalar que `dev` usa `node --watch` y `start` usa `node` sin recarga automática.
+Con MySQL preparado, ejecutar `npm start` y consultar `GET http://localhost:3001/health`. Después solicitar `/inexistente` para mostrar el `404` y enviar JSON mal escrito a `/auth/login` para mostrar el `400`. En `package.json`, señalar que `dev` compila React y luego usa `node --watch`; `start` ejecuta primero `prestart` para compilar y después `node` sin recarga automática. Para un cambio de frontend, recompilar y recargar.
 
 ## Preguntas con respuesta
 
@@ -103,3 +103,23 @@ Con MySQL preparado, ejecutar `npm start` y consultar `GET http://localhost:3001
 Podés explicar: «Mi bloque prepara Express, transforma el JSON, organiza las rutas, centraliza errores y arranca después de comprobar MySQL». Para defenderlo, señalá los bloques del mapa y mostrales una solicitud normal y una fallida.
 
 Estás listo cuando podés ubicar `start`, el control de origen, el middleware JSON y el manejador de errores sin leer toda la guía.
+
+## Lo que se suma con la pantalla de inicio
+
+Tu responsabilidad se amplía a servir React desde Express. Estudiá [config/frontend.js, líneas 1–16](../config/frontend.js#L1-L16), [su llamada en index.js](../index.js#L35-L38), [client/vite.config.js](../client/vite.config.js) y los scripts de [package.json](../package.json).
+
+### `setupFrontend(server)`
+
+Recibe la aplicación Express ya creada; no abre otro puerto ni consulta MySQL. Calcula la carpeta `client/dist` con `node:path`. Monta `express.static` únicamente bajo `/assets`: entrega los archivos JS y CSS compilados. Vite pone una huella en sus nombres; por eso se permite una caché larga con `immutable`.
+
+Registra cinco direcciones de pantalla. Su callback responde con `index.html` y `Cache-Control: no-cache`, para que el navegador revalide el HTML. Todas cargan la misma aplicación; React Router decide qué componente mostrar. Abrir directamente `/registro` funciona porque Express también conoce esa dirección. Las rutas desconocidas siguen devolviendo 404; no se convierte cualquier error API en HTML.
+
+### Compilación y módulos
+
+`npm run build` ejecuta Vite en el workspace `client`. `prestart` es un gancho de npm que corre antes de `npm start`. El backend conserva `require`/`module.exports`; `client/package.json` declara `type: module`, y el frontend utiliza `import`/`export`. El plugin React procesa JSX. Nada de esto crea tablas o reemplaza `db:init`.
+
+Helmet conserva su política de seguridad de contenido. En desarrollo no fuerza la actualización de recursos HTTP a HTTPS, porque el servidor local es HTTP; en producción se mantiene esa directiva. Los archivos compilados se cargan desde el mismo origen y no se habilitan scripts inline.
+
+**Práctica:** arrancar desde la raíz, abrir `/`, pegar `/login` directamente y comprobar `/health`. Editar un texto React, ejecutar `npm run build` y recargar. Explicá por qué no hace falta otro puerto ni CORS.
+
+**Pregunta:** ¿React atiende `/auth/login`? **Respuesta:** no; Express procesa el POST. React atiende la presentación de `/login` y envía la solicitud con `fetch`.

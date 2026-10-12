@@ -7,10 +7,15 @@ const { sequelize } = require('./config/db');
 require('./models');
 const authRoutes = require('./routes/auth.routes');
 const usersRoutes = require('./routes/users.routes');
+const setupFrontend = require('./config/frontend');
 
 const server = express();
 server.disable('x-powered-by');
-server.use(helmet());
+server.use(
+  helmet({
+    contentSecurityPolicy: { directives: { upgradeInsecureRequests: env.production ? [] : null } },
+  }),
+);
 server.use(express.json({ limit: '16kb' }));
 server.use(cookieParser());
 server.use((req, res, next) => {
@@ -29,6 +34,7 @@ server.get('/health', async (req, res) => {
 });
 server.use('/auth', authRoutes);
 server.use('/users', usersRoutes);
+setupFrontend(server);
 server.use((req, res) => res.status(404).json({ message: 'Ruta inexistente.' }));
 server.use((error, req, res, next) => {
   if (error instanceof ZodError) {

@@ -86,3 +86,23 @@ Registrar una cuenta ficticia y consultar en la base `SELECT id, nombre, email, 
 ## Preparación para la exposición
 
 Podés explicar: «Mi bloque define qué conserva cada usuario y sus restricciones. Registro crea una fila; login la busca y actualiza; la API devuelve sólo campos públicos». Estás listo cuando podés ubicar cada campo y diferenciar validación de entrada, restricción de base y respuesta pública.
+
+## Lo que se suma con la pantalla de inicio
+
+Seguí siendo responsable del modelo Usuario. Ahora relacioná ese modelo con los datos visibles de [Account.jsx, líneas 30–47](../client/src/pages/Account.jsx#L30-L47) y con [publicUser, líneas 1–12](../controllers/users.controller.js#L1-L12).
+
+### `Account()` y los campos del usuario
+
+Es un componente React sin argumentos explícitos: obtiene `user` mediante `useAuth`. Devuelve la pantalla de cuenta, o un estado de carga/error, o una redirección al login. No consulta directamente Sequelize. El usuario compartido se carga con `GET /users/me` o con la respuesta del login.
+
+`user.nombre` y `user.apellido` aparecen como nombre; `user.email` como correo; `user.estado` como estado. `roles` proviene de una asociación, no de una columna inventada en Usuario. La respuesta pública también incluye id y fechas, aunque esta pantalla no los muestra. Debés distinguir «no se muestra» de «no se devuelve»: el hash de contraseña sí se excluye explícitamente en el servidor.
+
+React interpreta estos valores como texto dentro de JSX. No se usa `dangerouslySetInnerHTML`: un nombre con signos HTML no debe convertirse en código de la página. El estilo `overflow-wrap` permite partir un correo largo sin desbordar la tarjeta.
+
+### Persistencia frente a estado visual
+
+Cambiar `user` en React actualiza la pantalla, pero no ejecuta un UPDATE en MySQL. Esta entrega no tiene edición de perfil. El nombre se crea en el registro, y `ultima_conexion` cambia en el login. Recargar vuelve a consultar el servidor; no se reconstruye el usuario desde campos editables o desde localStorage.
+
+**Práctica:** con una cuenta ficticia, comparar nombre, correo y estado entre la respuesta de `/users/me`, la pantalla y los campos del modelo. Identificar qué restricciones son de MySQL y cuáles son del formulario/Zod.
+
+**Pregunta:** ¿La tarjeta puede mostrar `password_hash` si se agrega un campo visual? **Respuesta:** la API no lo entrega. El componente no debe consultar la base ni ampliar esa exposición.

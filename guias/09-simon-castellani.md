@@ -15,7 +15,7 @@ Explicar cómo se elige el controlador, qué datos se aceptan y qué devuelve la
 | [users.controller.js, líneas 14–18](../controllers/users.controller.js#L14-L18)           | `getMe(req,res)`                   |
 | [routes/auth.routes.js, líneas 1–20](../routes/auth.routes.js#L1-L20)                     | Limitador y rutas de autenticación |
 | [routes/users.routes.js, líneas 1–8](../routes/users.routes.js#L1-L8)                     | Ruta privada del perfil            |
-| [index.js, líneas 30–31](../index.js#L30-L31)                                             | Prefijos de las rutas              |
+| [index.js, líneas 35–36](../index.js#L35-L36)                                             | Prefijos de las rutas              |
 
 ## Librerías que se usan
 
@@ -160,3 +160,37 @@ Esperado: `400`. Señalá los campos inválidos y el campo no permitido. Ningún
 **¿Por qué hay `/me` y no una lista pública de cuentas?** Para mostrar sólo el usuario de la sesión y no exponer a todos.
 
 Podés explicar: «Mi bloque define las entradas permitidas, conecta endpoints con controladores y muestra resultados con HTTP». Estás listo cuando podés encontrar cada ruta, identificar su middleware anterior y ejecutar la demostración sin perder la cookie.
+
+## Lo que se suma: portada, navegación y componentes
+
+Además de las rutas y validaciones, preparás la presentación de la interfaz reutilizada. Abrí [main.jsx](../client/src/main.jsx), [App.jsx](../client/src/App.jsx), [Landing.jsx](../client/src/pages/Landing.jsx), [ui.jsx](../client/src/components/ui.jsx) y [styles.css](../client/src/styles.css).
+
+### Entrada y rutas
+
+`main.jsx` obtiene el nodo `root` del HTML y usa `createRoot(...).render(...)` de React DOM para montar `App` dentro de StrictMode. No levanta el servidor. El plugin React de Vite compila JSX.
+
+`App()` devuelve `BrowserRouter`, el proveedor de autenticación y cinco rutas. `/` y `/nosotros` usan `Landing`; la segunda pasa `about`. `/login` y `/registro` usan `Auth` con distintos `mode` y `key`: cambiar de modo reinicia el estado del formulario. `/cuenta` usa `Account`. `Link` cambia de pantalla sin una recarga completa; Express también registra esas direcciones para permitir abrirlas directamente. Una dirección desconocida responde 404 del servidor.
+
+### `Brand()` y `Landing({about=false})`
+
+`Brand` devuelve el enlace al inicio, el ícono Activity y el nombre GYM—OS. Se reutiliza en portada, formularios y cuenta. Los íconos provienen de `lucide-react`; no dependen de un servidor externo.
+
+`Landing` consulta `useAuth` y devuelve la portada original del proyecto completo. `about` cambia el título y el párrafo de presentación. Si no hay usuario, los botones llevan a login/registro; si lo hay, llevan a cuenta. El título principal, la figura GO FURTHER y la identidad verde/crema se conservaron. No se importaron dashboard, rutinas, nutrición, progreso ni asistente IA.
+
+El arreglo de tres tarjetas se recorre con `map`, que devuelve un `article` por elemento. La clave `key` identifica cada tarjeta. Son contenido de presentación, no rutas o servicios implementados. La nota de alcance lo aclara. El arte decorativo tiene `aria-hidden`; el enlace Saltar al contenido permite llegar al main con teclado.
+
+### Componentes compartidos
+
+`Button({children, busy, ...props})` devuelve un botón, muestra el ícono de carga cuando corresponde y lo deshabilita mientras espera. `children` es el contenido del botón; las demás propiedades permiten pasar el callback o tipo.
+
+`Field({label, hint, children, ...props})` usa `useId` para generar una asociación única entre label e input. Si hay ayuda, conecta `aria-describedby`. Recibe valor, callback y restricciones del formulario; no valida ni escribe la base por sí mismo.
+
+`Feedback({error, success})` devuelve los avisos cuando existen. Error usa `role=alert`, éxito `role=status`; si hay detalles de Zod, muestra campo y mensaje. No cambia el código HTTP ni captura errores: los recibe de `useAction`.
+
+### Estilos y demostración
+
+`styles.css` define colores, columnas, botones y formularios. Las media queries de 960, 760 y 430 px adaptan tamaños, apilan portada/tarjetas y reorganizan el formulario. En móvil se oculta el panel decorativo del formulario, pero no los inputs. `prefers-reduced-motion` respeta la preferencia de movimiento reducido.
+
+**Práctica en navegador:** inicio -> Crear mi cuenta -> registro válido -> login -> cuenta -> recargar -> cerrar sesión. Mostrar también confirmación diferente, contraseña incorrecta y correo duplicado. Revisar anchos de celular, etiquetas de inputs y foco de teclado. Esta práctica es una instrucción para el equipo; no significa que una revisión visual ya se haya realizado.
+
+**Pregunta:** ¿`GET /login` ahora ejecuta el login? **Respuesta:** no. `/login` devuelve la pantalla; sólo `POST /auth/login` ejecuta el controlador. `GET /auth/login` sigue siendo 404.

@@ -98,3 +98,25 @@ Usá el ejemplo de login del README guardando cookies con `curl -c`. Mostrá `20
 ## Preparación para la exposición
 
 Podés explicar: «Mi bloque comprueba credenciales y estado, confirma los cambios del login en MySQL y recién después envía la cookie». Estás listo cuando podés ubicar las dos lecturas del usuario, la transacción y el momento exacto en que se entrega la cookie.
+
+## Lo que se suma con la pantalla de inicio
+
+Tu explicación ahora comienza en [Auth.jsx, líneas 8–63](../client/src/pages/Auth.jsx#L8-L63) y termina en [Account.jsx](../client/src/pages/Account.jsx). Estudiá la rama `mode === 'login'` y su relación con tu controlador; Gade cubre el registro.
+
+### `Auth({mode})`, `field` y la rama de login de `submit`
+
+React guarda email y password en estado. `field(key)` conecta cada input con ese estado. El componente espera a que se compruebe la sesión actual; si ya hay usuario, `Navigate` redirige a `/cuenta`. Esto evita mostrar un formulario innecesario, pero no concede permisos en el backend.
+
+`submit(e)` evita la recarga del navegador y ejecuta una operación con `action.run`. En login envía solamente `{email, password}` a `/auth/login`. `api` hace el POST y convierte un código fallido en error. El formulario muestra el error sin navegar ni fingir que hay una sesión.
+
+Cuando tu controlador responde 200, el navegador recibe la cookie y React recibe `data.usuario`. `setUser(data.usuario)` actualiza el contexto compartido; al volver a renderizar, `Navigate` lleva a la cuenta. Se limpia la contraseña del estado. El frontend no guarda el token, no verifica scrypt y no decide si la contraseña es correcta.
+
+### Errores y estados que tenés que distinguir
+
+`loading` significa que se está recuperando la sesión anterior. `action.busy` significa que se está procesando el envío del formulario. Un fallo de conexión al recuperar la sesión muestra Reintentar; el 401 de `/users/me` significa simplemente que no hay sesión. Un 401 del login muestra el mensaje de credenciales incorrectas. La confirmación de contraseña sólo existe en registro.
+
+El servidor devuelve la propiedad `usuario`, no `user`; adaptar ese nombre fue necesario al reutilizar la interfaz. El controlador conserva la comparación segura, el bloqueo de fila, la actualización de fecha y la creación de sesión que explicaste antes.
+
+**Práctica:** intentar una contraseña incorrecta y comprobar que se permanece en login; después ingresar correctamente, ver nombre/rol y recargar. Señalar dónde se crea la cookie, dónde cambia el estado React y dónde se produce la redirección.
+
+**Pregunta:** ¿`setUser` inicia una sesión en MySQL? **Respuesta:** no. Actualiza la interfaz después de que el controlador creó la sesión. Al consultar datos privados, el servidor vuelve a exigir la cookie válida.

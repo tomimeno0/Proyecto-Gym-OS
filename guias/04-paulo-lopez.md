@@ -101,3 +101,21 @@ Señalar que dos correos comparten el rol Cliente sin duplicar ese rol. Después
 ## Preparación para la exposición
 
 Podés explicar: «Mi bloque conecta usuarios y roles mediante una tabla intermedia, y define las asociaciones que después consultan los controladores». Estás listo cuando podés dibujar las tres tablas, explicar la pareja de IDs y encontrar los alias en el código.
+
+## Lo que se suma con la pantalla de inicio
+
+Ahora debés seguir el rol hasta la interfaz. Abrí [Account.jsx, líneas 43–44](../client/src/pages/Account.jsx#L43-L44), [login.controller.js, líneas 17–28](../controllers/login.controller.js#L17-L28), [sessions.controller.js, líneas 31–47](../controllers/sessions.controller.js#L31-L47) y [publicUser](../controllers/users.controller.js#L1-L12).
+
+### De la relación SQL al texto visible
+
+En el registro, `UsuarioRol.create` guarda la relación y `created.roles = [role]` prepara la respuesta. En login, `current.getRoles()` consulta la asociación definida en tu bloque. Al recuperar una sesión, el `include` anidado carga Usuario y sus roles con el alias `roles`. Las tres respuestas pasan por `publicUser`, que transforma las instancias en nombres mediante `map`.
+
+El resultado que recibe React es `roles: ['Cliente']`. En `Account`, `user.roles.join(', ')` convierte ese arreglo en un texto para mostrarlo. `join` no consulta MySQL ni cambia permisos. No se trata de tres formas distintas de guardar roles: se guarda la relación una vez y se carga según el recorrido.
+
+### Dónde termina tu responsabilidad
+
+`Account()` es un componente de React y `useAuth()` lee el usuario compartido. Estudiá su campo Rol y la forma de datos que necesita; no hace falta memorizar toda la maquetación. El formulario no incluye selector de rol y la solicitud de registro sólo envía nombre, apellido, correo y contraseña. Zod rechaza propiedades extra. No hay endpoints de administración de roles en esta entrega.
+
+**Práctica:** registrar una cuenta ficticia, iniciar sesión y señalar Cliente. Recargar y explicar que el rol vuelve desde el `include`, no de una lista fija en React. Señalar también las dos filas relacionadas mediante `usuario_roles` sin modificar la base de demostración.
+
+**Pregunta:** ¿Cambiar el texto Cliente en el navegador cambia el rol? **Respuesta:** no. Cambiar la presentación no modifica la tabla intermedia ni concede permisos; el servidor conserva la relación.

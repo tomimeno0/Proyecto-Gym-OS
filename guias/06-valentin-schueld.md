@@ -97,3 +97,23 @@ El resultado esperado es true, true, false y 43. No hace falta mostrar hashes de
 ## Preparación para la exposición
 
 Podés explicar: «Mi bloque protege contraseñas con scrypt y prepara tokens aleatorios cuyos hashes se guardan en MySQL». Estás listo cuando podés explicar las entradas y salidas de las cuatro funciones y distinguir sal, contraseña, token y hash.
+
+## Lo que se suma con la pantalla de inicio
+
+Conservá el estudio de `hashPassword`, `verifyPassword`, `newToken` y `hashToken`. Sumá [api(path, body), líneas 3–34](../client/src/lib.jsx#L3-L34) y [los campos de contraseña de Auth](../client/src/pages/Auth.jsx#L135-L154).
+
+### Qué hace `api(path, body)`
+
+Es una función async del navegador. Recibe una ruta relativa y, opcionalmente, un objeto. Sin objeto hace GET; con objeto hace POST, declara JSON y serializa el cuerpo. `credentials: 'same-origin'` permite que el navegador gestione cookies para el mismo origen; la función nunca lee el token.
+
+Espera la respuesta, interpreta JSON y devuelve sus datos cuando el código HTTP es exitoso. Si falla la conexión o llega una respuesta que no es JSON, genera un mensaje comprensible. Si HTTP falla, crea un `Error` con `message`, `details` y `status`; `Feedback` muestra el mensaje. Un 401 fuera de `/auth/` emite `session-expired`, para que el estado visual deje de mostrar una cuenta conectada. Esto no crea ni revoca sesiones: sólo comunica el rechazo del servidor.
+
+### Dónde se protegen las credenciales
+
+`type=password` oculta visualmente los caracteres; no cifra la solicitud. En esta computadora se usa HTTP de loopback; una publicación real debe usar HTTPS y la cookie segura de producción. scrypt se ejecuta en el backend, no en React. La contraseña existe temporalmente en los inputs y se limpia del estado tras una operación exitosa; no se persiste en localStorage, sessionStorage o en el bundle.
+
+La cookie HttpOnly no es accesible mediante JavaScript. En MySQL se guarda sólo el hash del token. No incluir claves de Cohere ni contraseñas SQL en archivos frontend: el JavaScript compilado es público. Esta entrega no integra IA.
+
+**Práctica:** señalar la separación formulario -> `api` -> controlador -> hash. Explicar por qué leer una cookie en React no es necesario y por qué una validación del navegador no protege por sí sola al servidor.
+
+**Pregunta:** ¿Usar JSON cifra la contraseña? **Respuesta:** no; JSON es un formato. HTTPS protege el transporte, scrypt protege su almacenamiento y HttpOnly reduce la exposición de la cookie al JavaScript.
